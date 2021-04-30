@@ -1,6 +1,9 @@
 package com.swing.teamstatus;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -12,17 +15,22 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
+import com.swing.teamstatus.TeamStatusBean;
+import com.swing.teamstatus.TeamStatusDBAction;
+
 public class TeamStatus extends JPanel {
+	
 	public TeamStatus() {
 	}
 
 	private JPanel panelTeamStatus;
 	private JRadioButton rbTeam1;
-	private JRadioButton tbTeam2;
+	private JRadioButton rbTeam2;
 	private JRadioButton rbTeam3;
 	private JRadioButton rbTeam4;
 	private JRadioButton rbTeam5;
-	private JRadioButton tbTeam6;
+	private JRadioButton rbTeam6;
+//	Need to Change
 	private JButton btnInTeamStatus;
 	private JButton btnOutTeamStatus;
 	private JTextField tfmate1_1;
@@ -35,7 +43,7 @@ public class TeamStatus extends JPanel {
 	private JTextField tfmate2_4;
 	private JTextField tfmate3_1;
 	private JTextField tfmate3_2;
-	private JTextField tfmate3_3;
+	private JTextField tfmate3_3;
 	private JTextField tfmate3_4;
 	private JTextField tfmate4_1;
 	private JTextField tfmate4_2;
@@ -52,6 +60,19 @@ public class TeamStatus extends JPanel {
 	private JTextField tfmate6_5;
 	private final ButtonGroup buttonGroup = new ButtonGroup();
 	
+	TeamStatusDBAction tsdbAction = new TeamStatusDBAction();
+	//팀원이름을 불러올 텍스트필드 집합
+	ArrayList<JTextField[]> tfbeanList = new ArrayList<JTextField[]>();
+	
+	//라디오버튼 집합(처음에 이름불러오고 내가 속한 팀에 라디오버튼이 클릭되어 있도록하기위해)
+	ArrayList<JRadioButton> rdbs = new ArrayList<JRadioButton>();
+	
+	//그 라디오버튼 번호를 저장하기 위한 객체
+	int myteamcount = 888;
+	
+	//들어갈 팀의 번호를 저장하기 위한 객체
+	int selectedrdb = 999;
+	
 	/**
 	 * Create the panel.
 	 */
@@ -64,38 +85,39 @@ public class TeamStatus extends JPanel {
 					panelTeamStatus.setBackground(new Color(255, 255, 255));
 					panelTeamStatus.setLayout(null);
 					panelTeamStatus.add(getRbTeam1());
-					panelTeamStatus.add(getTbTeam2());
-					panelTeamStatus.add(getTextField_4_1());
-					panelTeamStatus.add(getTfmate2_2());
-					panelTeamStatus.add(getTfmate2_3());
-					panelTeamStatus.add(getTfmate2_4());
+					panelTeamStatus.add(getRbTeam2());
 					panelTeamStatus.add(getRbTeam3());
 					panelTeamStatus.add(getRbTeam4());
 					panelTeamStatus.add(getRbTeam5());
-					panelTeamStatus.add(getTbTeam6());
-					panelTeamStatus.add(getBtnInTeamStatus());
-					panelTeamStatus.add(getBtnOutTeamStatus());
-					panelTeamStatus.add(getTextField_8_1());
-					panelTeamStatus.add(getTextField_9_1());
-					panelTeamStatus.add(getTextField_10_1());
-					panelTeamStatus.add(getTextField_11_1());
-					panelTeamStatus.add(getTextField_12_1());
-					panelTeamStatus.add(getTextField_13_1());
-					panelTeamStatus.add(getTextField_14_1());
-					panelTeamStatus.add(getTextField_15_1());
-					panelTeamStatus.add(getTextField_16_1());
-					panelTeamStatus.add(getTextField_17_1());
-					panelTeamStatus.add(getTextField_18_1());
-					panelTeamStatus.add(getTextField_19_1());
-					panelTeamStatus.add(getTextField_20_1());
-					panelTeamStatus.add(getTextField_21_1());
-					panelTeamStatus.add(getTextField_22_1());
-					panelTeamStatus.add(getTextField_23_1());
+					panelTeamStatus.add(getRbTeam6());
+					panelTeamStatus.add(gettfmate1_1());
+					panelTeamStatus.add(gettfmate1_2());
+					panelTeamStatus.add(gettfmate1_3());
+					panelTeamStatus.add(gettfmate1_4());
+					panelTeamStatus.add(gettfmate2_1());
+					panelTeamStatus.add(getTfmate2_2());
+					panelTeamStatus.add(getTfmate2_3());
+					panelTeamStatus.add(getTfmate2_4());
+					panelTeamStatus.add(gettfmate3_1());
+					panelTeamStatus.add(gettfmate3_2());
+					panelTeamStatus.add(gettfmate3_3());
+					panelTeamStatus.add(gettfmate3_4());
+					panelTeamStatus.add(gettfmate4_1());
+					panelTeamStatus.add(gettfmate4_2());
+					panelTeamStatus.add(gettfmate4_3());
+					panelTeamStatus.add(gettfmate4_4());
+					panelTeamStatus.add(gettfmate5_1());
+					panelTeamStatus.add(gettfmate5_2());
+					panelTeamStatus.add(gettfmate5_3());
+					panelTeamStatus.add(gettfmate5_4());
 					panelTeamStatus.add(getTfmate6_1());
 					panelTeamStatus.add(getTfmate6_2());
 					panelTeamStatus.add(getTfmate6_3());
 					panelTeamStatus.add(getTfmate6_4());
-					panelTeamStatus.add(getTextField_24_1());
+					panelTeamStatus.add(gettfmate6_5());
+					panelTeamStatus.add(getBtnInTeamStatus());
+					panelTeamStatus.add(getBtnOutTeamStatus());
+					
 				}
 			return panelTeamStatus;
 		}
@@ -106,25 +128,162 @@ public class TeamStatus extends JPanel {
 			buttonGroup.add(rbTeam1);
 			rbTeam1.setForeground(Color.GRAY);
 			rbTeam1.setBounds(20, 29, 107, 23);
+			
+			rbTeam1.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					selectedrdb = 1;
+					checkFull(selectedrdb);
+					checkMyname(selectedrdb);
+				}
+			});
+			
 		}
+		rdbs.add(rbTeam1);
 		return rbTeam1;
 	}
-	private JRadioButton getTbTeam2() {
-		if (tbTeam2 == null) {
-			tbTeam2 = new JRadioButton("Team 2");
-			buttonGroup.add(tbTeam2);
-			tbTeam2.setForeground(Color.GRAY);
-			tbTeam2.setBounds(20, 93, 107, 23);
+	private JRadioButton getRbTeam2() {
+		if (rbTeam2 == null) {
+			rbTeam2 = new JRadioButton("Team 2");
+			buttonGroup.add(rbTeam2);
+			rbTeam2.setForeground(Color.GRAY);
+			rbTeam2.setBounds(20, 93, 107, 23);
+			
+			rbTeam2.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					selectedrdb = 2;
+					checkFull(selectedrdb);
+					checkMyname(selectedrdb);
+				}
+			});
 		}
-		return tbTeam2;
+		rdbs.add(rbTeam2);
+		return rbTeam2;
 	}
-	private JTextField getTextField_4_1() {
+	
+	private JRadioButton getRbTeam3() {
+		if (rbTeam3 == null) {
+			rbTeam3 = new JRadioButton("Team 3");
+			buttonGroup.add(rbTeam3);
+			rbTeam3.setForeground(Color.GRAY);
+			rbTeam3.setBounds(20, 156, 107, 23);
+			
+			rbTeam3.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					selectedrdb = 3;
+					checkFull(selectedrdb);
+					checkMyname(selectedrdb);
+				}
+			});
+		}
+		rdbs.add(rbTeam3);
+		return rbTeam3;
+	}
+	private JRadioButton getRbTeam4() {
+		if (rbTeam4 == null) {
+			rbTeam4 = new JRadioButton("Team 4");
+			buttonGroup.add(rbTeam4);
+			rbTeam4.setForeground(Color.GRAY);
+			rbTeam4.setBounds(20, 219, 107, 23);
+			
+			rbTeam4.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					selectedrdb = 4;
+					checkFull(selectedrdb);
+					checkMyname(selectedrdb);
+				}
+			});
+		}
+		rdbs.add(rbTeam4);
+		return rbTeam4;
+	}
+	private JRadioButton getRbTeam5() {
+		if (rbTeam5 == null) {
+			rbTeam5 = new JRadioButton("Team 5");
+			buttonGroup.add(rbTeam5);
+			rbTeam5.setForeground(Color.GRAY);
+			rbTeam5.setBounds(20, 282, 107, 23);
+			
+			rbTeam5.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					selectedrdb = 5;
+					checkFull(selectedrdb);
+					checkMyname(selectedrdb);
+				}
+			});
+		}
+		rdbs.add(rbTeam5);
+		return rbTeam5;
+	}
+	private JRadioButton getRbTeam6() {
+		if (rbTeam6 == null) {
+			rbTeam6 = new JRadioButton("Team 6");
+			buttonGroup.add(rbTeam6);
+			rbTeam6.setForeground(Color.GRAY);
+			rbTeam6.setBounds(20, 352, 107, 23);
+			
+			rbTeam6.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					selectedrdb = 6;
+					checkFull(selectedrdb);
+					checkMyname(selectedrdb);
+				}
+			});
+		}
+		rdbs.add(rbTeam6);
+		return rbTeam6;
+	}
+	private JTextField gettfmate1_1() {
+		if (tfmate1_1 == null) {
+			tfmate1_1 = new JTextField();
+			tfmate1_1.setHorizontalAlignment(SwingConstants.CENTER);
+			tfmate1_1.setForeground(new Color(0, 102, 204));
+			tfmate1_1.setColumns(10);
+			tfmate1_1.setBounds(20, 51, 110, 30);
+			tfmate1_1.setEditable(false);
+		}
+		return tfmate1_1;
+	}
+	private JTextField gettfmate1_2() {
+		if (tfmate1_2 == null) {
+			tfmate1_2 = new JTextField();
+			tfmate1_2.setHorizontalAlignment(SwingConstants.CENTER);
+			tfmate1_2.setForeground(new Color(0, 102, 204));
+			tfmate1_2.setColumns(10);
+			tfmate1_2.setBounds(130, 51, 110, 30);
+			tfmate1_2.setEditable(false);
+		}
+		return tfmate1_2;
+	}
+	private JTextField gettfmate1_3() {
+		if (tfmate1_3 == null) {
+			tfmate1_3 = new JTextField();
+			tfmate1_3.setHorizontalAlignment(SwingConstants.CENTER);
+			tfmate1_3.setForeground(new Color(0, 102, 204));
+			tfmate1_3.setColumns(10);
+			tfmate1_3.setBounds(240, 51, 110, 30);
+			tfmate1_3.setEditable(false);
+		}
+		return tfmate1_3;
+	}
+	private JTextField gettfmate1_4() {
+		if (tfmate1_4 == null) {
+			tfmate1_4 = new JTextField();
+			tfmate1_4.setHorizontalAlignment(SwingConstants.CENTER);
+			tfmate1_4.setForeground(new Color(0, 102, 204));
+			tfmate1_4.setColumns(10);
+			tfmate1_4.setBounds(350, 51, 110, 30);
+			tfmate1_4.setEditable(false);
+		}
+		return tfmate1_4;
+	}
+	private JTextField gettfmate2_1() {
 		if (tfmate2_1 == null) {
 			tfmate2_1 = new JTextField();
 			tfmate2_1.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate2_1.setForeground(new Color(0, 102, 204));
 			tfmate2_1.setColumns(10);
 			tfmate2_1.setBounds(20, 118, 110, 30);
+			tfmate2_1.setEditable(false);
 		}
 		return tfmate2_1;
 	}
@@ -135,6 +294,7 @@ public class TeamStatus extends JPanel {
 			tfmate2_2.setForeground(new Color(0, 102, 204));
 			tfmate2_2.setColumns(10);
 			tfmate2_2.setBounds(130, 118, 110, 30);
+			tfmate2_2.setEditable(false);
 		}
 		return tfmate2_2;
 	}
@@ -145,6 +305,7 @@ public class TeamStatus extends JPanel {
 			tfmate2_3.setForeground(new Color(0, 102, 204));
 			tfmate2_3.setColumns(10);
 			tfmate2_3.setBounds(240, 118, 110, 30);
+			tfmate2_3.setEditable(false);
 		}
 		return tfmate2_3;
 	}
@@ -155,223 +316,145 @@ public class TeamStatus extends JPanel {
 			tfmate2_4.setForeground(new Color(0, 102, 204));
 			tfmate2_4.setColumns(10);
 			tfmate2_4.setBounds(350, 118, 110, 30);
+			tfmate2_4.setEditable(false);
 		}
 		return tfmate2_4;
 	}
-	private JRadioButton getRbTeam3() {
-		if (rbTeam3 == null) {
-			rbTeam3 = new JRadioButton("Team 3");
-			buttonGroup.add(rbTeam3);
-			rbTeam3.setForeground(Color.GRAY);
-			rbTeam3.setBounds(20, 156, 107, 23);
-		}
-		return rbTeam3;
-	}
-	private JRadioButton getRbTeam4() {
-		if (rbTeam4 == null) {
-			rbTeam4 = new JRadioButton("Team 4");
-			buttonGroup.add(rbTeam4);
-			rbTeam4.setForeground(Color.GRAY);
-			rbTeam4.setBounds(20, 219, 107, 23);
-		}
-		return rbTeam4;
-	}
-	private JRadioButton getRbTeam5() {
-		if (rbTeam5 == null) {
-			rbTeam5 = new JRadioButton("Team 5");
-			buttonGroup.add(rbTeam5);
-			rbTeam5.setForeground(Color.GRAY);
-			rbTeam5.setBounds(20, 282, 107, 23);
-		}
-		return rbTeam5;
-	}
-	private JRadioButton getTbTeam6() {
-		if (tbTeam6 == null) {
-			tbTeam6 = new JRadioButton("Team 6");
-			buttonGroup.add(tbTeam6);
-			tbTeam6.setForeground(Color.GRAY);
-			tbTeam6.setBounds(20, 352, 107, 23);
-		}
-		return tbTeam6;
-	}
-	private JButton getBtnInTeamStatus() {
-		if (btnInTeamStatus == null) {
-			btnInTeamStatus = new JButton("IN");
-			btnInTeamStatus.setBackground(Color.WHITE);
-			btnInTeamStatus.setForeground(new Color(0, 102, 204));
-			btnInTeamStatus.setBounds(70, 455, 150, 35);
-		}
-		return btnInTeamStatus;
-	}
-	private JButton getBtnOutTeamStatus() {
-		if (btnOutTeamStatus == null) {
-			btnOutTeamStatus = new JButton("OUT");
-			btnOutTeamStatus.setBackground(Color.WHITE);
-			btnOutTeamStatus.setForeground(new Color(0, 102, 204));
-			btnOutTeamStatus.setBounds(270, 455, 150, 35);
-		}
-		return btnOutTeamStatus;
-	}
-	private JTextField getTextField_8_1() {
+	
+
+	private JTextField gettfmate3_1() {
 		if (tfmate3_1 == null) {
 			tfmate3_1 = new JTextField();
 			tfmate3_1.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate3_1.setForeground(new Color(0, 102, 204));
 			tfmate3_1.setColumns(10);
 			tfmate3_1.setBounds(20, 177, 110, 30);
+			tfmate3_1.setEditable(false);
 		}
 		return tfmate3_1;
 	}
-	private JTextField getTextField_9_1() {
+	private JTextField gettfmate3_2() {
 		if (tfmate3_2 == null) {
 			tfmate3_2 = new JTextField();
 			tfmate3_2.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate3_2.setForeground(new Color(0, 102, 204));
 			tfmate3_2.setColumns(10);
 			tfmate3_2.setBounds(130, 177, 110, 30);
+			tfmate3_2.setEditable(false);
 		}
 		return tfmate3_2;
 	}
-	private JTextField getTextField_10_1() {
-		if (tfmate3_3 == null) {
-			tfmate3_3 = new JTextField();
-			tfmate3_3.setHorizontalAlignment(SwingConstants.CENTER);
-			tfmate3_3.setForeground(new Color(0, 102, 204));
-			tfmate3_3.setColumns(10);
-			tfmate3_3.setBounds(240, 177, 110, 30);
+	private JTextField gettfmate3_3() {
+		if (tfmate3_3 == null) {
+			tfmate3_3 = new JTextField();
+			tfmate3_3.setHorizontalAlignment(SwingConstants.CENTER);
+			tfmate3_3.setForeground(new Color(0, 102, 204));
+			tfmate3_3.setColumns(10);
+			tfmate3_3.setBounds(240, 177, 110, 30);
+			tfmate3_3.setEditable(false);
 		}
-		return tfmate3_3;
+		return tfmate3_3;
 	}
-	private JTextField getTextField_11_1() {
+	private JTextField gettfmate3_4() {
 		if (tfmate3_4 == null) {
 			tfmate3_4 = new JTextField();
 			tfmate3_4.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate3_4.setForeground(new Color(0, 102, 204));
 			tfmate3_4.setColumns(10);
 			tfmate3_4.setBounds(350, 177, 110, 30);
+			tfmate3_4.setEditable(false);
 		}
 		return tfmate3_4;
 	}
-	private JTextField getTextField_12_1() {
+	private JTextField gettfmate4_1() {
 		if (tfmate4_1 == null) {
 			tfmate4_1 = new JTextField();
 			tfmate4_1.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate4_1.setForeground(new Color(0, 102, 204));
 			tfmate4_1.setColumns(10);
 			tfmate4_1.setBounds(20, 240, 110, 30);
+			tfmate4_1.setEditable(false);
 		}
 		return tfmate4_1;
 	}
-	private JTextField getTextField_13_1() {
+	private JTextField gettfmate4_2() {
 		if (tfmate4_2 == null) {
 			tfmate4_2 = new JTextField();
 			tfmate4_2.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate4_2.setForeground(new Color(0, 102, 204));
 			tfmate4_2.setColumns(10);
 			tfmate4_2.setBounds(130, 240, 110, 30);
+			tfmate4_2.setEditable(false);
 		}
 		return tfmate4_2;
 	}
-	private JTextField getTextField_14_1() {
+	private JTextField gettfmate4_3() {
 		if (tfmate4_3 == null) {
 			tfmate4_3 = new JTextField();
 			tfmate4_3.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate4_3.setForeground(new Color(0, 102, 204));
 			tfmate4_3.setColumns(10);
 			tfmate4_3.setBounds(240, 240, 110, 30);
+			tfmate4_3.setEditable(false);
 		}
 		return tfmate4_3;
 	}
-	private JTextField getTextField_15_1() {
+	private JTextField gettfmate4_4() {
 		if (tfmate4_4 == null) {
 			tfmate4_4 = new JTextField();
 			tfmate4_4.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate4_4.setForeground(new Color(0, 102, 204));
 			tfmate4_4.setColumns(10);
 			tfmate4_4.setBounds(350, 240, 110, 30);
+			tfmate4_4.setEditable(false);
 		}
 		return tfmate4_4;
 	}
-	private JTextField getTextField_16_1() {
+	private JTextField gettfmate5_1() {
 		if (tfmate5_1 == null) {
 			tfmate5_1 = new JTextField();
 			tfmate5_1.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate5_1.setForeground(new Color(0, 102, 204));
 			tfmate5_1.setColumns(10);
 			tfmate5_1.setBounds(20, 310, 110, 30);
+			tfmate5_1.setEditable(false);
 		}
 		return tfmate5_1;
 	}
-	private JTextField getTextField_17_1() {
+	private JTextField gettfmate5_2() {
 		if (tfmate5_2 == null) {
 			tfmate5_2 = new JTextField();
 			tfmate5_2.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate5_2.setForeground(new Color(0, 102, 204));
 			tfmate5_2.setColumns(10);
 			tfmate5_2.setBounds(130, 310, 110, 30);
+			tfmate5_2.setEditable(false);
 		}
 		return tfmate5_2;
 	}
-	private JTextField getTextField_18_1() {
+	private JTextField gettfmate5_3() {
 		if (tfmate5_3 == null) {
 			tfmate5_3 = new JTextField();
 			tfmate5_3.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate5_3.setForeground(new Color(0, 102, 204));
 			tfmate5_3.setColumns(10);
 			tfmate5_3.setBounds(240, 310, 110, 30);
+			tfmate5_3.setEditable(false);
 		}
 		return tfmate5_3;
 	}
-	private JTextField getTextField_19_1() {
+	private JTextField gettfmate5_4() {
 		if (tfmate5_4 == null) {
 			tfmate5_4 = new JTextField();
 			tfmate5_4.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate5_4.setForeground(new Color(0, 102, 204));
 			tfmate5_4.setColumns(10);
 			tfmate5_4.setBounds(350, 310, 110, 30);
+			tfmate5_4.setEditable(false);
 		}
 		return tfmate5_4;
 	}
-	private JTextField getTextField_20_1() {
-		if (tfmate1_1 == null) {
-			tfmate1_1 = new JTextField();
-			tfmate1_1.setHorizontalAlignment(SwingConstants.CENTER);
-			tfmate1_1.setForeground(new Color(0, 102, 204));
-			tfmate1_1.setColumns(10);
-			tfmate1_1.setBounds(20, 51, 110, 30);
-		}
-		return tfmate1_1;
-	}
-	private JTextField getTextField_21_1() {
-		if (tfmate1_2 == null) {
-			tfmate1_2 = new JTextField();
-			tfmate1_2.setHorizontalAlignment(SwingConstants.CENTER);
-			tfmate1_2.setForeground(new Color(0, 102, 204));
-			tfmate1_2.setColumns(10);
-			tfmate1_2.setBounds(130, 51, 110, 30);
-		}
-		return tfmate1_2;
-	}
-	private JTextField getTextField_22_1() {
-		if (tfmate1_3 == null) {
-			tfmate1_3 = new JTextField();
-			tfmate1_3.setHorizontalAlignment(SwingConstants.CENTER);
-			tfmate1_3.setForeground(new Color(0, 102, 204));
-			tfmate1_3.setColumns(10);
-			tfmate1_3.setBounds(240, 51, 110, 30);
-		}
-		return tfmate1_3;
-	}
-	private JTextField getTextField_23_1() {
-		if (tfmate1_4 == null) {
-			tfmate1_4 = new JTextField();
-			tfmate1_4.setHorizontalAlignment(SwingConstants.CENTER);
-			tfmate1_4.setForeground(new Color(0, 102, 204));
-			tfmate1_4.setColumns(10);
-			tfmate1_4.setBounds(350, 51, 110, 30);
-		}
-		return tfmate1_4;
-	}
+
 	private JTextField getTfmate6_1() {
 		if (tfmate6_1 == null) {
 			tfmate6_1 = new JTextField();
@@ -379,6 +462,7 @@ public class TeamStatus extends JPanel {
 			tfmate6_1.setForeground(new Color(0, 102, 204));
 			tfmate6_1.setColumns(10);
 			tfmate6_1.setBounds(20, 377, 110, 30);
+			tfmate6_1.setEditable(false);
 		}
 		return tfmate6_1;
 	}
@@ -389,6 +473,7 @@ public class TeamStatus extends JPanel {
 			tfmate6_2.setForeground(new Color(0, 102, 204));
 			tfmate6_2.setColumns(10);
 			tfmate6_2.setBounds(130, 377, 110, 30);
+			tfmate6_2.setEditable(false);
 		}
 		return tfmate6_2;
 	}
@@ -399,6 +484,7 @@ public class TeamStatus extends JPanel {
 			tfmate6_3.setForeground(new Color(0, 102, 204));
 			tfmate6_3.setColumns(10);
 			tfmate6_3.setBounds(240, 377, 110, 30);
+			tfmate6_3.setEditable(false);
 		}
 		return tfmate6_3;
 	}
@@ -409,23 +495,168 @@ public class TeamStatus extends JPanel {
 			tfmate6_4.setForeground(new Color(0, 102, 204));
 			tfmate6_4.setColumns(10);
 			tfmate6_4.setBounds(350, 377, 110, 30);
+			tfmate6_4.setEditable(false);
 		}
 		return tfmate6_4;
 	}
-	private JTextField getTextField_24_1() {
+	private JTextField gettfmate6_5() {
 		if (tfmate6_5 == null) {
 			tfmate6_5 = new JTextField();
 			tfmate6_5.setHorizontalAlignment(SwingConstants.CENTER);
 			tfmate6_5.setForeground(new Color(0, 102, 204));
 			tfmate6_5.setColumns(10);
 			tfmate6_5.setBounds(20, 406, 110, 30);
+			tfmate6_5.setEditable(false);
 		}
 		return tfmate6_5;
 	}
-
+	private JButton getBtnInTeamStatus() {
+		if (btnInTeamStatus == null) {
+			btnInTeamStatus = new JButton("IN");
+			btnInTeamStatus.setBackground(Color.WHITE);
+			btnInTeamStatus.setForeground(new Color(0, 102, 204));
+			btnInTeamStatus.setBounds(70, 455, 150, 35);
+			btnInTeamStatus.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					clickInAction();
+				}
+			});
+		}
+		return btnInTeamStatus;
+	}
+	private JButton getBtnOutTeamStatus() {
+		if (btnOutTeamStatus == null) {
+			btnOutTeamStatus = new JButton("OUT");
+			btnOutTeamStatus.setBackground(Color.WHITE);
+			btnOutTeamStatus.setForeground(new Color(0, 102, 204));
+			btnOutTeamStatus.setBounds(270, 455, 150, 35);
+			btnOutTeamStatus.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					clickOutAction();
+				}
+			});
+		}
+		return btnOutTeamStatus;
+	}
+	// 텍스트 필드 집합에 저장하고 쿼리로 빈을 채움
+	public void showTeammateStatusAction(){
+		
+		btnInTeamStatus.setEnabled(false);
+		btnOutTeamStatus.setEnabled(false);
+		
+		//정리해주고 채워주기 위함
+		for(JTextField[] tfarrays : tfbeanList) {
+			clearTeamColumn(tfarrays);
+		}
+		
+		ArrayList<TeamStatusBean> beanList =  tsdbAction.ShowTeammateStatus();
+		
+		JTextField[] tf1 = {tfmate1_1, tfmate1_2, tfmate1_3, tfmate1_4};
+		JTextField[] tf2 = {tfmate2_1, tfmate2_2, tfmate2_3, tfmate2_4};
+		JTextField[] tf3 = {tfmate3_1, tfmate3_2, tfmate3_3, tfmate3_4};
+		JTextField[] tf4 = {tfmate4_1, tfmate4_2, tfmate4_3, tfmate4_4};
+		JTextField[] tf5 = {tfmate5_1, tfmate5_2, tfmate5_3, tfmate5_4};
+		JTextField[] tf6 = {tfmate6_1, tfmate6_2, tfmate6_3, tfmate6_4, tfmate6_5};
+		
+		tfbeanList.add(tf1);
+		tfbeanList.add(tf2);
+		tfbeanList.add(tf3);
+		tfbeanList.add(tf4);
+		tfbeanList.add(tf5);
+		tfbeanList.add(tf6);
+		
+		for(int i=0; i<beanList.size(); i++) {
+			
+			int tempno = beanList.get(i).getNo()-1;
+			String tempname = beanList.get(i).getName();
+//			System.out.println(tempno + tempname);
+			insertstudentname(tfbeanList.get(tempno), tempname, tempno);
+			
+		}
 		
 	}
+	
+	//빈칸이면 출력해주고 내이름이 있다면 버튼 조작, 내가 속한 팀에 버튼의 번호를 보내주기위함
+	public void insertstudentname(JTextField[] tfs, String name, int rdbcount) {
+		
+		for(int i=0;i<tfs.length;i++) {
+			if(tfs[i].getText().equals("")) {
+				tfs[i].setText(name);
+				//수정하기
+				if(name.equals("이승연")) {
+					rdbs.get(rdbcount).setSelected(true);
+					btnInTeamStatus.setVisible(false);
+					btnOutTeamStatus.setEnabled(true);
+					myteamcount = rdbcount;
+				}
+				return;
+			}
+		}
 
-
-
+	}
+	
+	//그팀에 텍스트필드가 빈자리가 없다면 in버튼 비활성화
+	public void checkFull(int num) {
+		
+		JTextField[] tfs =  tfbeanList.get(num-1);
+		for(int i=0;i<tfs.length;i++) {
+			if(tfs[i].getText().equals("")) {
+				btnInTeamStatus.setEnabled(true);
+				return;
+			}
+		}
+		btnInTeamStatus.setEnabled(false);
+	}
+	
+	//그 필드에 내 이름있는지 확인하고 out버튼 활정화
+	public void checkMyname(int num) {
+		
+		JTextField[] tfs =  tfbeanList.get(num-1);
+		for(int i=0;i<tfs.length;i++) {
+			//수정해야함
+			if(tfs[i].getText().equals("이승연")) {
+				btnOutTeamStatus.setEnabled(true);
+				return;
+			}
+		}
+		btnOutTeamStatus.setEnabled(false);
+	}
+	
+	//out버튼 클릭 delete 쿼리 호출
+	public void clickOutAction() {
+		JTextField[] tfs = tfbeanList.get(myteamcount);
+		for(int i=0;i<tfs.length;i++) {
+			//수정하기
+			if(tfs[i].getText().equals("이승연")) {
+				tsdbAction.teamStatusOutAction();
+				showTeammateStatusAction();
+				btnInTeamStatus.setVisible(true);
+				btnInTeamStatus.setEnabled(true);
+			}
+		}
+	}
+	
+	//in 버튼 클릭시 insert쿼리 호출
+	public void clickInAction() {
+		JTextField[] tfs = tfbeanList.get(selectedrdb-1);
+		for(int i=0;i<tfs.length;i++) {
+			//수정하기
+			if(tfs[i].getText().equals("")) {
+				tsdbAction.teamStatusInAction(selectedrdb);
+				//pk를 아이디로 잡아야하지 않을까?
+				showTeammateStatusAction();
+				btnInTeamStatus.setVisible(false);
+				return;
+			}
+		}
+	}
+	
+	//텍스트필드 지워주기 위한 친구
+	private void clearTeamColumn(JTextField[] tfs) {
+		for(JTextField tf : tfs) {
+			tf.setText("");
+		}
+	}
+	
+}
 

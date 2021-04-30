@@ -2,19 +2,15 @@ package com.swing.checkprofile;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -22,50 +18,59 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-import com.swing.checkprofile.CheckProfileBean;
-import com.swing.checkprofile.CheckProfileDBAction;
-
-
+import com.swing.login.Login;
+import com.swing.mainpage.FixedPanelDBAction;
 
 public class CheckProfile extends JPanel {
-	
-	
 	public CheckProfile() {
 	}
 
 	private JPanel panelCheckProfile;
-	private JPanel ImagePanel_1;
+	private JLabel ImageLabel_1;
 	private JLabel lblCheckProfileId;
 	private JLabel lblCheckProfileName;
 	private JLabel lblCheckProfileMbti;
 	private JLabel lblCheckProfileGithub;
 	private JLabel lblCheckProfileAddress;
-	private JLabel lblCheckProfileStrength;
-	private JLabel lblCheckProfileIntroduce;
 	private JTextField tfCheckProfileId;
 	private JTextField tfCheckProfileName;
 	private JTextField tfCheckProfileAddress;
 	private JTextField tfCheckProfileMbti;
 	private JTextField tfCheckProfileGithub;
+	private JLabel lblCheckProfileStrength;
 	private JTextField tfCheckProfileStrength;
+	private JLabel lblCheckProfileIntroduce;
 	private JTextField tfCheckProfileIntroduce;
+	private JScrollPane scrollPane_Project;
+	private JTable ProjectTable;
 	private JLabel lblCheckProfileProject;
 	private JLabel lblCheckProfileTeammateReview;
 	private final DefaultTableModel Outer_Table_TeammateReviewTable = new DefaultTableModel();
 	private final DefaultTableModel Outer_Table_ProjectTable = new DefaultTableModel();
-	private JScrollPane scrollPane_Project;
-	private JTable ProjectTable;
 	private JScrollPane scrollPane_TeammateReview;
-	private JTable TeammateReviewTable;
 	private JButton btnEditinCheckProfile;
+	private JTable TeammateReviewTable;
 	private JLabel lblCheckProfilePhone;
 	private JTextField tfCheckProfilePhone;
 	private JButton btnImportImage;
 	private JButton btnCancel;
+	String imageNewPath;
+	ArrayList<JTextField> checkPersonalInfo = new ArrayList<JTextField>();
+	
+	
+	
+	String[] personalInfo =getCheckProfileInfo(Login.tfLoginUserId.getText());
+	
+	
+	FixedPanelDBAction fpdba = new FixedPanelDBAction(Login.tfLoginUserId.getText());
+	ImageIcon imageIcon = new ImageIcon(fpdba.getStudentImage());
+	
+	
+	
 	
 	
 	/**
@@ -78,7 +83,7 @@ public class CheckProfile extends JPanel {
 			panelCheckProfile.setForeground(Color.BLACK);
 			panelCheckProfile.setBounds(300, 45, 490, 497);
 			panelCheckProfile.setLayout(null);
-			panelCheckProfile.add(getImagePanel_1());
+			panelCheckProfile.add(getImageLabel_1());
 			panelCheckProfile.add(getLblCheckProfileId());
 			panelCheckProfile.add(getLblCheckProfileName());
 			panelCheckProfile.add(getLblCheckProfileMbti());
@@ -102,6 +107,8 @@ public class CheckProfile extends JPanel {
 			panelCheckProfile.add(getTfCheckProfilePhone());
 			panelCheckProfile.add(getBtnImportImage());
 			panelCheckProfile.add(getBtnCancel());
+			getAllJTextField();
+			setDataOfAllJTextField();
 			
 		}
 		return panelCheckProfile;
@@ -110,6 +117,12 @@ public class CheckProfile extends JPanel {
 	private JButton getBtnImportImage() {
 		if (btnImportImage == null) {
 			btnImportImage = new JButton("Import Image");
+			btnImportImage.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					importImageAction();
+
+				}
+			});
 			btnImportImage.setFont(new Font("Lucida Grande", Font.PLAIN, 9));
 			btnImportImage.setForeground(new Color(0, 102, 204));
 			btnImportImage.setBounds(30, 152, 102, 29);
@@ -118,14 +131,16 @@ public class CheckProfile extends JPanel {
 		return btnImportImage;
 	}
 	
-	private JPanel getImagePanel_1() {
-		if (ImagePanel_1 == null) {
-			ImagePanel_1 = new JPanel();
-			ImagePanel_1.setBackground(new Color(245, 245, 245));
-			ImagePanel_1.setLayout(null);
-			ImagePanel_1.setBounds(30, 10, 102, 136);
+	private JLabel getImageLabel_1() {
+		if (ImageLabel_1 == null) {
+			ImageLabel_1 = new JLabel();
+			ImageLabel_1.setBackground(new Color(245, 245, 245));
+			ImageLabel_1.setLayout(null);
+			ImageLabel_1.setBounds(30, 10, 102, 136);
+			Image image = imageIcon.getImage().getScaledInstance(ImageLabel_1.getWidth()+17, ImageLabel_1.getHeight(), Image.SCALE_SMOOTH);
+			ImageLabel_1.setIcon(new ImageIcon(image));
 		}
-		return ImagePanel_1;
+		return ImageLabel_1;
 	}
 	private JLabel getLblCheckProfileId() {
 		if (lblCheckProfileId == null) {
@@ -397,7 +412,6 @@ public class CheckProfile extends JPanel {
 	    col = ProjectTable.getColumnModel().getColumn(vColIndex);
 	    width = 200;
 	    col.setPreferredWidth(width);
-	    
 	}
 	@SuppressWarnings("static-access")
 	public void CheckProfileTableReview(){
@@ -443,10 +457,10 @@ public class CheckProfile extends JPanel {
 
 	
 	private void editButtonAction() {
+		
 		btnCancel.setVisible(true);
 		btnImportImage.setVisible(true);
 		textFieldEnable();
-
 	}
 	
 	private void cancelButtonAction() {
@@ -455,17 +469,17 @@ public class CheckProfile extends JPanel {
 		btnEditinCheckProfile.setText("Edit");
 		btnEditinCheckProfile.setVisible(true);
 		textFieldUnable();
-		SearchAction();
 	}
 	private void saveAction() {
 		btnEditinCheckProfile.setText("Edit");
 		btnCancel.setVisible(false);
 		btnImportImage.setVisible(false);
+		saveAllJTextfieldAction();
 		textFieldUnable();
-		UpdateAction();
-		
 	}
 	private void textFieldEnable() {
+		tfCheckProfileId.setEditable(false);
+		tfCheckProfileName.setEditable(false);
 		tfCheckProfilePhone.setEditable(true);
 		tfCheckProfileAddress.setEditable(true);
 		tfCheckProfileMbti.setEditable(true);
@@ -474,6 +488,8 @@ public class CheckProfile extends JPanel {
 		tfCheckProfileIntroduce.setEditable(true);
 	}
 	private void textFieldUnable() {
+		tfCheckProfileId.setEditable(false);
+		tfCheckProfileName.setEditable(false);
 		tfCheckProfilePhone.setEditable(false);
 		tfCheckProfileAddress.setEditable(false);
 		tfCheckProfileMbti.setEditable(false);
@@ -482,44 +498,171 @@ public class CheckProfile extends JPanel {
 		tfCheckProfileIntroduce.setEditable(false);
 	}
 	
-	// 내정보 수정
-	public void UpdateAction() {
-		
-		String id = tfCheckProfileId.getText();
-		String name = tfCheckProfileName.getText();
-		String mbti = tfCheckProfileMbti.getText();
-		String github_id = tfCheckProfileGithub.getText();
-		String subway = tfCheckProfileAddress.getText();
-		String phone = tfCheckProfilePhone.getText();
-		String strength = tfCheckProfileStrength.getText();
-		String introduce = tfCheckProfileIntroduce.getText();
-		
-		
-		CheckProfileDBAction dbaction = new CheckProfileDBAction(id, name, mbti, github_id, subway, phone, strength, introduce);
-		boolean aaa = dbaction.checkProfileUpdateAction();
-		if(aaa == true){
-	          JOptionPane.showMessageDialog(null, tfCheckProfileName.getText()+" 님의 정보가 수정 되었습니다.!");                    
-		}else{
-	          JOptionPane.showMessageDialog(null, "DB에 자료 입력중 에러가 발생했습니다! \n 시스템관리자에 문의하세요!");                    
-		}
-
+	private void getAllJTextField() {
+		checkPersonalInfo.add(tfCheckProfileId);
+		checkPersonalInfo.add(tfCheckProfileName);
+		checkPersonalInfo.add(tfCheckProfileMbti);
+		checkPersonalInfo.add(tfCheckProfileGithub);
+		checkPersonalInfo.add(tfCheckProfileAddress);
+		checkPersonalInfo.add(tfCheckProfilePhone);
+		checkPersonalInfo.add(tfCheckProfileStrength);
+		checkPersonalInfo.add(tfCheckProfileIntroduce);
 	}
 	
-	//------crybaby 불러오기
-	public void SearchAction() {
-		
-		CheckProfileDBAction dbAction = new CheckProfileDBAction();
-		CheckProfileBean bean = dbAction.checkProfileAction();
-        
-		tfCheckProfileId.setText(bean.getId());
-		tfCheckProfileName.setText(bean.getName());
-		tfCheckProfileMbti.setText(bean.getMbti());
-		tfCheckProfileGithub.setText(bean.getGithub_id());
-		tfCheckProfileAddress.setText(bean.getSubway());
-		tfCheckProfilePhone.setText(bean.getPhone());
-		tfCheckProfileStrength.setText(bean.getStrength());
-		tfCheckProfileIntroduce.setText(bean.getIntroduce());
-
+//	private void getDataOfAllJTextField() {
+//		for(int i = 0 ; i < checkPersonalInfo.size() ; i++) {
+//			System.out.println(checkPersonalInfo.get(i));
+//		}
+//	}
+	
+	private void setDataOfAllJTextField() {
+		for(int i = 0 ; i < checkPersonalInfo.size() ; i++) {
+			checkPersonalInfo.get(i).setText(personalInfo[i]);
+		}
 	}
+	
+	private void saveAllJTextfieldAction() {
+		
+		String userId = Login.tfLoginUserId.getText();
+		String userMbti = tfCheckProfileMbti.getText();
+		String userGithubId = tfCheckProfileGithub.getText();
+		String userAddress = tfCheckProfileAddress.getText();
+		String userPhone = tfCheckProfilePhone.getText();
+		String userStrength = tfCheckProfileStrength.getText();
+		String userIntroduce = tfCheckProfileIntroduce.getText();
+		
+		if(userPhone.equals("")) {
+			
+			JOptionPane.showMessageDialog(null, "Blank in Phone number area is not acceptable ! ");
+			tfCheckProfilePhone.setText(personalInfo[5]);
+			return;
+		}else {
+						
+			CheckProfileDBAction checkProfile = new CheckProfileDBAction(userId,userMbti,userGithubId,userAddress,userPhone,userStrength,userIntroduce);
+			
+			boolean msg = checkProfile.updateUserProfile();
+			
+			if(msg) {
+				UpdateImageAction();
+				JOptionPane.showMessageDialog(null, "Update Complete!");
+			}else {
+				JOptionPane.showMessageDialog(null, "Update failed!");
+			}
+		}
+		
+	}
+	public String[] getCheckProfileInfo(String loginId) {
+		
+		CheckProfileDBAction checkProfileInfo = new CheckProfileDBAction(loginId);
+		
+		String[] arrCheckProfileInfo = checkProfileInfo.insertAction();
+		
+		return arrCheckProfileInfo;
+	}
+	
+	public void importImageAction() {
+		
+		JFileChooser browseImageFile = new JFileChooser();
+		
+		FileNameExtensionFilter fnef = new FileNameExtensionFilter("Image","png","jpg","jpeg");
+		browseImageFile.addChoosableFileFilter(fnef);
+		
+		int showOpenDialogue = browseImageFile.showOpenDialog(null);
+		
+		if(showOpenDialogue == JFileChooser.APPROVE_OPTION) {
+			File selectedImageFile = browseImageFile.getSelectedFile();
+			String selectedImagePath = selectedImageFile.getAbsolutePath();
+			imageNewPath = selectedImagePath;
+			System.out.println(selectedImagePath);
+//			JOptionPane.showMessageDialog(null, selectedImagePath);
+			
+			btnImportImage.setText("Done!");
+			ImageIcon imageIcon = new ImageIcon(selectedImagePath);
+			
+			Image image = imageIcon.getImage().getScaledInstance(ImageLabel_1.getWidth()+17, ImageLabel_1.getHeight(), Image.SCALE_SMOOTH);
+			ImageLabel_1.setIcon(new ImageIcon(image));
+			}
+	}
+	
+	private void UpdateImageAction() {
+		
+		String userId = Login.tfLoginUserId.getText();
+		
+		
+		if(btnImportImage.getText().equals("Done!")) {
+			
+			CheckProfileDBAction UpdateImage = new CheckProfileDBAction(userId,imageNewPath);
+			
+			
+			boolean msgNullPhoto = UpdateImage.makeNullUserPhoto();
+			
+			if(msgNullPhoto) {
+				boolean msg = UpdateImage.updateUserPhoto();
+				
+					if(msg) {
+		
+					}else {
+						JOptionPane.showMessageDialog(null, "Image Updated failed");
+						return;
+					}
+
+				
+			}else {
+				JOptionPane.showMessageDialog(null, "Image Make Null failed");
+			}
+			
+		}else {
+			return;
+		}
+	}
+	
+	public void showCheckprofileMyProject(){
+        
+		CheckProfileDBAction checkProfileProjectDBAction = new CheckProfileDBAction(Login.tfLoginUserId.getText());
+		
+//		DbAction dbAction = new DbAction(ABORT);
+		ArrayList<CheckProfileBean> projectList = checkProfileProjectDBAction.selectCheckProfileMyProjectList();
+		
+		int listCount = projectList.size();
+		
+		for( int i =0 ; i < listCount;i++) {
+			
+			String tmpTeamName = Integer.toString(projectList.get(i).getTeamName());
+			
+			String[] qTxt = { projectList.get(i).getProjectName(),  tmpTeamName , projectList.get(i).getTeamGitAddress()};
+			
+			System.out.println(qTxt[i]);
+			
+			Outer_Table_ProjectTable.addRow(qTxt);
+			
+		}
+		
+		
+	}
+
+	public void showCheckprofileTeammateReview(){
+        
+		CheckProfileDBAction checkProfileReviewDBAction = new CheckProfileDBAction(Login.tfLoginUserId.getText());
+		
+//		DbAction dbAction = new DbAction(ABORT);
+		ArrayList<CheckProfileBean> teamReviewList = checkProfileReviewDBAction.selectCheckProfileReviewList();
+		
+		int listCount = teamReviewList.size();
+		
+		
+		for( int i =0 ; i < listCount;i++) {
+			
+			String[] qTxt = { teamReviewList.get(i).getSenderName(), teamReviewList.get(i).getProjectName(), teamReviewList.get(i).getComment() };
+			
+			
+			
+			Outer_Table_TeammateReviewTable.addRow(qTxt);
+			
+		}
+		
+		
+	}
+	
+	
 
 }
