@@ -635,10 +635,12 @@ public class AdminTeamStatus extends JPanel {
 	//in 버튼 클릭시 insert쿼리 호출
 	public void clickInAction() {
 		
+		int row = tableTeamStatus.getSelectedRow();
 		JTextField[] tfs = tfbeanList.get(selectedrdb-1);
+		
 		for(int i=0;i<tfs.length;i++) {
 			//수정하기
-			if(tfs[i].getText().equals("")) {
+			if(tfs[i].getText().equals("") && row != -1) {
 				boolean aaa = dbAction.teamStatusInAction(selectedrdb);
 				
 				if(aaa == true){
@@ -654,6 +656,7 @@ public class AdminTeamStatus extends JPanel {
 				return;
 			}
 		}
+		JOptionPane.showMessageDialog(null, "선택 되었는지 확인 부탁드립니다.!");
 	}
 	
 	//out버튼 클릭 delete 쿼리 호출
