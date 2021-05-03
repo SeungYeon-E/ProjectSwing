@@ -634,22 +634,18 @@ public class AdminTeamStatus extends JPanel {
 	
 	//in 버튼 클릭시 insert쿼리 호출
 	public void clickInAction() {
-		
 		int row = tableTeamStatus.getSelectedRow();
 		JTextField[] tfs = tfbeanList.get(selectedrdb-1);
-		
 		for(int i=0;i<tfs.length;i++) {
-			//수정하기
 			if(tfs[i].getText().equals("") && row != -1) {
 				boolean aaa = dbAction.teamStatusInAction(selectedrdb);
-				
 				if(aaa == true){
 					TSStudentListTable();
 					SearchAction();
 					showTeammateStatusAction();
 			        JOptionPane.showMessageDialog(null, selectedrdb + " 팀에 추가 되었습니다.!"); 
 				}else{
-					JOptionPane.showMessageDialog(null, "DB에 자료 입력중 에러가 발생했습니다! \n 학생을 클릭해주세요!!! \n 그래도 안되면 시스템관리자에 문의하세요!");
+					JOptionPane.showMessageDialog(null, "DB에 자료 입력중 에러가 발생했습니다! \n 그래도 안되면 시스템관리자에 문의하세요!");
 				}
 				buttonGroup.clearSelection();
 				dbAction = new AdminTeamStatusDBAction();
@@ -661,7 +657,6 @@ public class AdminTeamStatus extends JPanel {
 	
 	//out버튼 클릭 delete 쿼리 호출
 	public void clickOutAction() {
-		
 		
 		boolean aaa = dbAction.teamStatusOutAction(selectedrdb);
 		
